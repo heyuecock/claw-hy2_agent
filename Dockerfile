@@ -5,7 +5,6 @@ WORKDIR /app
 ENV SERVER_DOMAIN=example.clawcloudrun.com
 ENV UDP_PORT=5678
 ENV PASSWORD=your-uuid-password
-ARG DASHBOARD_VERSION=latest
 ENV DASHBOARD_VERSION=$DASHBOARD_VERSION
 
 # 安装依赖 & 创建必要目录
