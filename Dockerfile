@@ -1,11 +1,11 @@
 FROM alpine:latest
 WORKDIR /app
 
-# 设置环境变量默认值（可在 docker run 时覆盖）
+# 设置环境变量（固定哪吒Agent版本为v0.20.5）
 ENV SERVER_DOMAIN=example.clawcloudrun.com
 ENV UDP_PORT=5678
 ENV PASSWORD=your-uuid-password
-ENV DASHBOARD_VERSION=$DASHBOARD_VERSION
+ENV DASHBOARD_VERSION=v0.20.5  # 直接指定固定版本
 
 # 安装依赖 & 创建必要目录
 RUN apk update && \
@@ -22,13 +22,9 @@ RUN openssl req -x509 -nodes -newkey ec:<(openssl ecparam -name prime256v1) \
     -out /etc/hysteria/server.crt \
     -subj "/CN=bing.com" -days 36500
 
-# 下载并解压 nezha-agent (修改为GitHub源)
+# 下载并解压 nezha-agent (直接指定v0.20.5版本)
 RUN set -eux; \
-    if [ "$DASHBOARD_VERSION" = "latest" ]; then \
-        API_URL="https://api.github.com/repos/nezhahq/agent/releases/latest"; \
-    else \
-        API_URL="https://api.github.com/repos/nezhahq/agent/releases/tags/$DASHBOARD_VERSION"; \
-    fi; \
+    API_URL="https://api.github.com/repos/nezhahq/agent/releases/tags/v0.20.5"; \
     AGENT_URL=$(curl -s -H "Accept: application/vnd.github.v3+json" $API_URL | jq -r '.assets[] | select(.name | endswith("linux_amd64.zip")) | .browser_download_url'); \
     if [ -z "$AGENT_URL" ] || [ "$AGENT_URL" = "null" ]; then \
         echo "❌ 获取 Agent 下载地址失败，退出"; exit 1; \
