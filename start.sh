@@ -14,28 +14,6 @@ echo "   - UDP端口: ${UDP_PORT}"
 echo "   - 密码: ${PASSWORD}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# 生成 Nezha Agent 配置 (已移除uuid字段)
-cat > /app/config.yaml <<EOF
-debug: true
-disable_auto_update: true
-disable_command_execute: false
-disable_force_update: true
-disable_nat: false
-disable_send_query: false
-gpu: false
-insecure_tls: false
-ip_report_period: 1800
-report_delay: 4
-server: ${NZ_SERVER}
-skip_connection_count: false
-skip_procs_count: false
-temperature: false
-tls: ${NZ_TLS}
-use_gitee_to_upgrade: false
-use_ipv6_country_code: false
-client_secret: ${NZ_CLIENT_SECRET}
-EOF
-
 # 创建 Hysteria2 配置文件
 cat > /etc/hysteria/config.yaml <<EOF
 listen: :${UDP_PORT}
@@ -68,5 +46,19 @@ echo "🔗 Hysteria2 客户端连接信息:"
 echo "hy2://${PASSWORD}@${SERVER_DOMAIN}:${UDP_PORT}?sni=bing.com&insecure=1#${SERVER_DOMAIN}-${COUNTRY_CODE}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# 启动 Nezha Agent 作为主进程
-exec ./nezha-agent --config /app/config.yaml
+# 启动 Nezha Agent 使用命令行参数
+exec ./nezha-agent \
+    -s "${NZ_SERVER}" \
+    -p "${NZ_CLIENT_SECRET}" \
+    --tls="${NZ_TLS}" \
+    --debug \
+    --disable-auto-update \
+    --disable-force-update \
+    --report-delay=4 \
+    --ip-report-period=1800 \
+    --disable-command-execute=false \
+    --disable-nat=false \
+    --disable-send-query=false \
+    --skip-conn=false \
+    --skip-procs=false \
+    --use-ipv6-countrycode=false
