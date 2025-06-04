@@ -1,14 +1,21 @@
 #!/bin/bash
 set -e
 
-echo "✅ 正在启动 Nezha Agent，配置如下："
-echo "NZ_SERVER: ${NZ_SERVER}"
-echo "NZ_UUID: ${NZ_UUID}"
-echo "NZ_CLIENT_SECRET: ${NZ_CLIENT_SECRET}"
-echo "NZ_TLS: ${NZ_TLS}"
-echo "DASHBOARD_VERSION: ${DASHBOARD_VERSION:-latest}"
+echo "🟢 正在启动服务..."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🔹 Nezha Agent 配置:"
+echo "   - 服务器: ${NZ_SERVER}"
+echo "   - 密钥: ${NZ_CLIENT_SECRET}"
+echo "   - TLS: ${NZ_TLS}"
+echo "   - 版本: ${DASHBOARD_VERSION:-latest}"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🔹 Hysteria2 配置:"
+echo "   - 域名: ${SERVER_DOMAIN}"
+echo "   - UDP端口: ${UDP_PORT}"
+echo "   - 密码: ${PASSWORD}"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# 生成 Nezha Agent 配置
+# 生成 Nezha Agent 配置 (已移除uuid字段)
 cat > /app/config.yaml <<EOF
 debug: true
 disable_auto_update: true
@@ -27,14 +34,8 @@ temperature: false
 tls: ${NZ_TLS}
 use_gitee_to_upgrade: false
 use_ipv6_country_code: false
-uuid: ${NZ_UUID}
 client_secret: ${NZ_CLIENT_SECRET}
 EOF
-
-echo "✅ 正在启动 Hysteria2，配置如下："
-echo "SERVER_DOMAIN: ${SERVER_DOMAIN}"
-echo "UDP_PORT: ${UDP_PORT}"
-echo "PASSWORD: ${PASSWORD}"
 
 # 创建 Hysteria2 配置文件
 cat > /etc/hysteria/config.yaml <<EOF
@@ -58,15 +59,15 @@ EOF
 # 启动 Hysteria2 到后台
 /usr/local/bin/hysteria server -c /etc/hysteria/config.yaml &
 
-# 获取公网 IP 和国家代码
-SERVER_IP=$(curl -s https://api.ipify.org)
+# 获取连接信息
+SERVER_IP=$(curl -s https://api.ipify.org || echo "未知IP")
 COUNTRY_CODE=$(curl -s https://ipapi.co/${SERVER_IP}/country/ || echo "XX")
 
-echo "✅ Hysteria2 启动成功"
-echo "------------------------------------------------------------------------"
-echo "🎯 客户端连接配置（请将端口替换为爪云分配的外网 UDP 端口）："
-echo "hy2://${PASSWORD}@${SERVER_DOMAIN}:${UDP_PORT}?sni=bing.com&insecure=1#claw.cloud-hy2-${COUNTRY_CODE}"
-echo "------------------------------------------------------------------------"
+echo "✅ 服务启动成功"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🔗 Hysteria2 客户端连接信息:"
+echo "hy2://${PASSWORD}@${SERVER_DOMAIN}:${UDP_PORT}?sni=bing.com&insecure=1#${SERVER_DOMAIN}-${COUNTRY_CODE}"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-# 启动 Nezha Agent，作为主进程（PID 1）
+# 启动 Nezha Agent 作为主进程
 exec ./nezha-agent --config /app/config.yaml
